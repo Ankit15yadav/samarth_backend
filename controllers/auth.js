@@ -1,5 +1,6 @@
 const db = require('../utils/dbConnect');
 const crypto = require('crypto');
+const { uploadImageToCloudinary } = require('../utils/imageUploader');
 
 const signIn = async (req, res) => {
     try {
@@ -38,6 +39,63 @@ const signIn = async (req, res) => {
         res.status(500).json({
             message: "Internal Server Error",
             error: error.message,
+        });
+    }
+};
+
+
+const signUp = async (req, res) => {
+    try {
+        // console.log('Request body:', req.body);
+        // console.log('Request files:', req.files);
+        const { username } = req.body;
+
+        if (!username) {
+            return res.status(400).json({
+                error: "Username is required"
+            });
+        }
+
+        let imageUri = '';
+        if (req.files && req.files.image) {
+            const file = req.files.image;
+            try {
+                const image = await uploadImageToCloudinary(
+                    file.tempFilePath,
+                    process.env.FOLDER_NAME,
+                    1000,
+                    1000
+                );
+
+                if (!image.secure_url) {
+                    throw new Error("Unable to upload image");
+                }
+
+                imageUri = image.secure_url;
+            } catch (uploadError) {
+                console.error("Error uploading to Cloudinary:", uploadError);
+                return res.status(500).json({
+                    success: false,
+                    error: "Error uploading image",
+                    message: uploadError.message
+                });
+            }
+        } else {
+            console.log('No file uploaded');
+        }
+
+        const query = `INSERT INTO tb_login_master (emp_name, image_path) VALUES (?, ?)`;
+
+        const [result] = await db.query(query, [username, imageUri]);
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            error: error,
         });
     }
 };
@@ -90,5 +148,5 @@ const updateLocation = async (req, res) => {
     }
 }
 
-module.exports = { signIn, getUsers, updateLocation }
+module.exports = { signIn, getUsers, updateLocation, signUp }
 

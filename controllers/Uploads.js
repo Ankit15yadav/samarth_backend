@@ -66,17 +66,17 @@ const uploadExpense = async (req, res) => {
 const uploadTSID = async (req, res) => {
     try {
 
-        const { zone_id, zone_name, state_id, state_name, location_id, location_tsid, survey_start, emp_id, emp_name, submission_date } = req.body;
+        const { zone_id, zone_name, state_id, state_name, location_id, location_tsid, survey_start, emp_id, emp_name, submission_date, direction1, direction2 } = req.body;
 
-        console.log(zone_id, zone_name, state_id, state_name, location_id, location_tsid, survey_start, emp_id, emp_name, submission_date);
+        // console.log(zone_id, zone_name, state_id, state_name, location_id, location_tsid, survey_start, emp_id, emp_name, submission_date);
 
         if (!zone_id || !zone_name || !state_id || !state_name || !location_id || !location_tsid || !survey_start || !emp_id || !emp_name || !submission_date) {
             throw new Error("All fields are required");
         }
 
-        const query = "INSERT INTO tb_survey_master (zone_id, zone_name, state_id, state_name, location_id, location_tsid, survey_start, emp_id, emp_name, submission_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const query = "INSERT INTO tb_survey_master (zone_id, zone_name, state_id, state_name, location_id, location_tsid, survey_start, emp_id, emp_name, submission_date, direction1, direction2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)";
 
-        const [result] = await db.query(query, [zone_id, zone_name, state_id, state_name, location_id, location_tsid, survey_start, emp_id, emp_name, submission_date])
+        const [result] = await db.query(query, [zone_id, zone_name, state_id, state_name, location_id, location_tsid, survey_start, emp_id, emp_name, submission_date, direction1, direction2])
 
         if (!result) {
             throw new Error("tsid not inserted in db");
