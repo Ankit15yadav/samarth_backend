@@ -96,4 +96,61 @@ const uploadTSID = async (req, res) => {
     }
 }
 
-module.exports = { uploadExpense, uploadTSID }
+const photoUpload = async (req, res) => {
+    try {
+
+        const { zone_id, zone_name, tsid, imageType, description } = req.body;
+
+        if (!zone_id || !zone_name || !tsid || !imageType || !description) {
+            throw new Error("All fields are required");
+        }
+
+        let imageUrl = '';
+        if (req.files && req.files.file) {
+            const file = req.files.file;
+            try {
+                const image = await uploadImageToCloudinary(
+                    file.tempFilePath,
+                    process.env.FOLDER_NAME,
+                    1000,
+                    1000
+                );
+
+                if (!image.secure_url) {
+                    throw new Error("Unable to upload image");
+                }
+
+                imageUrl = image.secure_url;
+                // console.log('Uploaded image URL:', imageUrl);
+            } catch (uploadError) {
+                console.error("Error uploading to Cloudinary:", uploadError);
+                return res.status(500).json({
+                    success: false,
+                    error: "Error uploading image",
+                    message: uploadError.message
+                });
+            }
+        }
+        else {
+            console.log('No file uploaded');
+        }
+
+        const query = 'INSERT INTO tb_photo_upload_trans (zone_id , zone_name, tsid, jpg_type, datetime , jpg_path) VALUES (?,?,?,?,?,?)';
+
+        const [result] = await db.query(query, [zone_id, zone_name, tsid, imageType, new Date(), imageUrl]);
+
+        if (!result) {
+            throw new Error("photo upload form failed");
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: result
+        })
+
+    } catch (error) {
+        console.error("Error during photo upload:", error);
+    }
+}
+
+module.exports = { uploadExpense, uploadTSID, photoUpload }

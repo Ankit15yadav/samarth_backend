@@ -14,7 +14,7 @@ const Expense = async (req, res) => {
         }
 
         return res.status(200).json({
-            message: "Login successful",
+            message: "expense fetching successful",
             results
         })
 
@@ -56,4 +56,32 @@ const Tsid = async (req, res) => {
     }
 }
 
-module.exports = { Expense, Tsid }
+const imageType = async (req, res) => {
+    try {
+
+        const query = 'SELECT * FROM tb_image_name_master';
+
+        const [result] = await db.query(query);
+
+        if (result.length === 0) {
+            return res.status(400).json({
+                message: "Error while getting Image Type Details",
+            })
+        }
+
+        return res.status(200).json({
+            succes: true,
+            result
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: error
+        })
+
+    }
+}
+
+module.exports = { Expense, Tsid, imageType }
