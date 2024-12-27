@@ -112,7 +112,6 @@ const getUsers = async (req, res) => {
 
 const updateLocation = async (req, res) => {
     try {
-
         const { user, location } = req.body;
 
         if (!user || !location) {
@@ -121,32 +120,45 @@ const updateLocation = async (req, res) => {
         }
 
         const query = `
-        INSERT INTO tb_login_trans 
-        (emp_id, emp_name, emp_category, login_datetime, logout_datetime, total_dur, latitude, longitude)
-        VALUES (?, ?, ?, NOW(), NULL, 0, ?, ?)
-    `;
+            INSERT INTO tb_login_trans 
+            (emp_id, emp_name, emp_category, login_datetime, logout_datetime, total_dur, latitude, longitude)
+            VALUES (?, ?, ?, ?, NULL, 0, ?, ?)
+        `;
 
         const [result] = await db.query(query, [
             user.emp_id,
             user.emp_name,
             user.emp_category,
+            new Date(),
             location.latitude,
-            location.longitude
+            location.longitude,
         ]);
 
-        res.status(200).json({
+        // Query to fetch the insertion timestamp
+        const timestampQuery = `
+            SELECT login_datetime 
+            FROM tb_login_trans 
+            WHERE id = ?
+        `;
+        const [timestampResult] = await db.query(timestampQuery, [result.insertId]);
+
+        const insertedTime = timestampResult[0]?.login_datetime;
+
+        return res.status(200).json({
             success: true,
             message: "Location updated successfully",
-        })
+            data: insertedTime, // Return the insertion time
+        });
 
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
             error: error,
-        })
+        });
     }
-}
+};
+
 
 module.exports = { signIn, getUsers, updateLocation, signUp }
 

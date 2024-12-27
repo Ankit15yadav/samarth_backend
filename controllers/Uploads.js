@@ -99,9 +99,9 @@ const uploadTSID = async (req, res) => {
 const photoUpload = async (req, res) => {
     try {
 
-        const { zone_id, zone_name, tsid, imageType, description } = req.body;
+        const { zone_id, zone_name, tsid, imageType, description, emp_id, emp_name } = req.body;
 
-        if (!zone_id || !zone_name || !tsid || !imageType || !description) {
+        if (!zone_id || !zone_name || !tsid || !imageType || !description || !emp_id || !emp_name) {
             throw new Error("All fields are required");
         }
 
@@ -135,9 +135,9 @@ const photoUpload = async (req, res) => {
             console.log('No file uploaded');
         }
 
-        const query = 'INSERT INTO tb_photo_upload_trans (zone_id , zone_name, tsid, jpg_type, datetime , jpg_path) VALUES (?,?,?,?,?,?)';
+        const query = 'INSERT INTO tb_photo_upload_trans (zone_id , zone_name, tsid, jpg_type, datetime , jpg_path , emp_id , emp_name) VALUES (?,?,?,?,?,?,?,?)';
 
-        const [result] = await db.query(query, [zone_id, zone_name, tsid, imageType, new Date(), imageUrl]);
+        const [result] = await db.query(query, [zone_id, zone_name, tsid, imageType, new Date(), imageUrl, emp_id, emp_name]);
 
         if (!result) {
             throw new Error("photo upload form failed");
@@ -153,4 +153,34 @@ const photoUpload = async (req, res) => {
     }
 }
 
-module.exports = { uploadExpense, uploadTSID, photoUpload }
+const uploadedImage = async (req, res) => {
+    try {
+        const { emp_id } = req.body;
+
+        if (!emp_id) {
+            return res.status(400).json({ success: false, message: 'All fields are required' });
+        }
+
+        const query = 'SELECT * FROM tb_photo_upload_trans WHERE emp_id = ?';
+        const [result] = await db.query(query, [emp_id]);
+
+        if (result.length === 0) {
+            return res.status(404).json({ success: false, message: 'No images found' });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (error) {
+        console.error('Error during fetching image:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: error.message,
+        });
+    }
+};
+
+
+module.exports = { uploadExpense, uploadTSID, photoUpload, uploadedImage };
