@@ -161,7 +161,7 @@ const uploadedImage = async (req, res) => {
             return res.status(400).json({ success: false, message: 'All fields are required' });
         }
 
-        const query = 'SELECT * FROM tb_photo_upload_trans WHERE emp_id = ?';
+        const query = 'SELECT * FROM tb_photo_upload_trans WHERE emp_id = ? ORDER BY id DESC';
         const [result] = await db.query(query, [emp_id]);
 
         if (result.length === 0) {
@@ -182,5 +182,32 @@ const uploadedImage = async (req, res) => {
     }
 };
 
+const deleteImage = async (req, res) => {
+    try {
+        const { id } = req.body;
 
-module.exports = { uploadExpense, uploadTSID, photoUpload, uploadedImage };
+        if (!id) {
+            return res.status(400).json({ success: false, message: 'All fields are required' });
+        }
+
+        const query = 'DELETE FROM tb_photo_upload_trans WHERE id = ?';
+
+        const [result] = await db.query(query, [id]);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Image deleted successfully',
+            data: result,
+        });
+
+    } catch (error) {
+        console.error('Error during deleting image:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal Server Error',
+            error: error.message,
+        });
+    }
+}
+
+module.exports = { uploadExpense, uploadTSID, photoUpload, uploadedImage, deleteImage };

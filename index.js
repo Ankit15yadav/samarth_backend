@@ -9,6 +9,7 @@ const cors = require('cors');
 const fileUpload = require("express-fileupload");
 const { cloudinaryConnect } = require('./utils/cloudinary');
 const compression = require('compression');
+// const redisClient = require('./utils/redisClient');
 
 const PORT = 4000
 
@@ -25,6 +26,7 @@ app.use(fileUpload({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(compression());
+// redisClient.connect();
 cloudinaryConnect();
 
 app.get('/', (req, res) => {
