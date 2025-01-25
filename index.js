@@ -5,6 +5,7 @@ const authRoutes = require("./routes/authRoutes");
 const DropDown = require("./routes/dropDownRoutes")
 const uploads = require("./routes/Uploads")
 const time = require("./routes/time")
+const approval = require("./routes/approval")
 const cors = require('cors');
 const fileUpload = require("express-fileupload");
 const { cloudinaryConnect } = require('./utils/cloudinary');
@@ -34,6 +35,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/v1', authRoutes)
+app.use('/api/v1', approval)
 app.use('/api/v1/menu', DropDown)
 app.use('/api/v1/upload', uploads)
 app.use('/api/v1/time', time)
