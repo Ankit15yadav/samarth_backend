@@ -84,4 +84,58 @@ const imageType = async (req, res) => {
     }
 }
 
-module.exports = { Expense, Tsid, imageType }
+const updateExpense = async (req, res) => {
+
+    try {
+
+        const { id } = req.body;
+
+        if (!id) {
+            return res.status(400).json({
+                message: "All fields are required",
+            })
+        }
+
+        const query = 'UPDATE tb_expn_trans '
+
+    } catch (error) {
+
+    }
+}
+
+const getOneExpense = async (req, res) => {
+    try {
+
+        const { id } = req.body;
+        if (!id) {
+            return res.status(400).json({
+                message: "All fields are required",
+            })
+        }
+
+        const query = 'SELECT * FROM tb_expn_trans WHERE id = ?';
+        const [result] = await db.query(query, [id]);
+
+        if (result.length === 0) {
+            return res.status(400).json({
+                message: "Error while getting Expense Details",
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: result
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message: "Internal Server Error",
+            error: error
+        })
+    }
+}
+
+// const upDateExpense = async
+
+module.exports = { Expense, Tsid, imageType, getOneExpense }
