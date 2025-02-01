@@ -1,6 +1,6 @@
 const express = require('express');
 const { signIn, getUsers, updateLocation, signUp } = require('../controllers/auth');
-const { sign } = require('crypto');
+const { authentication } = require("../middleware/authentication")
 const router = express.Router();
 
 router.post('/login', signIn);

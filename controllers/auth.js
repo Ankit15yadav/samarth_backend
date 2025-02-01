@@ -1,6 +1,8 @@
 const db = require('../utils/dbConnect');
 const crypto = require('crypto');
+const jwt = require("jsonwebtoken")
 const { uploadImageToCloudinary } = require('../utils/imageUploader');
+const { use } = require('express-fileuploader');
 
 const signIn = async (req, res) => {
     try {
@@ -16,6 +18,8 @@ const signIn = async (req, res) => {
         // Hash the password
         const hashedPass = crypto.createHash('md5').update(password).digest("hex");
 
+
+
         // Query the database using pool with promise-based API
         const query = 'SELECT * FROM tb_login_master WHERE emp_name = ? AND emp_pass = ?';
 
@@ -27,6 +31,19 @@ const signIn = async (req, res) => {
         }
 
         const user = results[0];
+
+        const token = jwt.sign({
+            emp_name: user.emp_name,
+            emp_id: user.emp_id,
+            emp_category: user.emp_category
+        },
+            process.env.JWT_SECRET, { expiresIn: '5m' }
+        )
+
+        user.token = token;
+        user.emp_pass = 0;
+
+        // console.log(user);
 
         // Successful login
         return res.status(200).json({
